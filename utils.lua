@@ -3,6 +3,17 @@ function utils.get_extension(filename)
 	return filename:match("%.([%a]+)$")
 end
 
+function utils.read_file(filename, line_parser)
+	local fn_not_found = "ERROR: file %q was not found!"
+	line_parser = line_parser or function(x) return x end
+	local f, data = io.open(filename, 'r'), {}
+	assert(f, fn_not_found:format(filename))
+	for line in f:lines("*l") do
+		table.insert(data, line_parser(line))
+	end
+	return data
+end
+
 function utils.path_exists(path)
 	local f = io.open(path, 'r')
 	if f then
@@ -47,4 +58,5 @@ end
 function utils.is_numeric(str)
 	return string.match(str, "^-?[%d%.]+$")
 end
+
 return utils
