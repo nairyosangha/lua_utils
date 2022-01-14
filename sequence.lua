@@ -1,41 +1,76 @@
 local seq = {}
-local seq_mt = {
-	__index = seq,
-	__tostring = function(x) return "{ " .. table.concat(x.items, ", ") .. " }" end
-}
+
+local function iterable(sequence)
+	local function _run_predicates(input)
+		local steps = { [0]=input }
+		for _,p in pairs(sequence.predicates) do
+			local result = p.predicate(input)
+			if p.filter and result == nil then
+				break
+			end
+			table.insert(steps, result)
+		end
+		-- steps should contain as many results as there were predicates
+		-- if there are less, the input value got filtered out
+		local result = steps[#steps]
+		return #steps == #sequence.predicates, steps[#sequence.predicates]
+	end
+	local function _iter(sequence, idx)
+		for i=idx,#sequence.items do
+			local success, result = _run_predicates(sequence.items[i])
+			if success then
+				return i+1, result
+			end
+		end
+	end
+	return _iter, sequence, 1
+end
 
 function Sequence(args)
-	return setmetatable({ items = args, size = #args }, seq_mt)
+	return setmetatable({ items = args, predicates = {} }, { __index = seq })
+end
+
+function seq:collect()
+	local collection = {}
+	for i,item in iterable(self) do
+		table.insert(collection, item)
+	end
+	return collection
 end
 
 function seq:filter(predicate)
-	local filtered = {}
-	for k,v in pairs(self.items) do
-		if predicate(v) then
-			filtered[k] = v
-		end
-	end
-	return Sequence(filtered)
+	table.insert(self.predicates, { filter = true, predicate = function(x) if predicate(x) then return x end end })
+	return self
 end
 
 function seq:map(mapper)
-	local mapped = {}
-	for k,v in pairs(self.items) do
-		mapped[k] = mapper(v)
-	end
-	return Sequence(mapped)
+	table.insert(self.predicates, { filter = false, predicate = mapper} )
+	return self
 end
 
 function seq:foreach(habbening)
-	for _,v in pairs(self.items) do
-		local _ = habbening(v)
+	for _,v in pairs(self:collect()) do
+		habbening(v)
 	end
 end
 
 function seq:find_first(predicate)
-	for k,v in pairs(self.items) do
+	for k,v in iterable(self) do
 		if predicate(v) == true then
 			return k,v
 		end
 	end
 end
+
+function seq:reduce(reducer)
+	local function _reduce(a,b) return a and reducer(a,b) or b end
+	result = nil
+	for k,v in pairs(self:collect()) do
+		result = _reduce(result, v)
+	end
+	return result
+end
+
+seq.TO_NUMBER = function(x) return tonumber(x) end
+seq.ADD = function(a,b) return a+b end
+return seq
