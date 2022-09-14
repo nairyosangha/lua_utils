@@ -12,12 +12,11 @@ local function iterable(sequence)
 		end
 		-- steps should contain as many results as there were predicates
 		-- if there are less, the input value got filtered out
-		local result = steps[#steps]
 		return #steps == #sequence.predicates, steps[#sequence.predicates]
 	end
-	local function _iter(sequence, idx)
-		for i=idx,#sequence.items do
-			local success, result = _run_predicates(sequence.items[i])
+	local function _iter(sequence_, idx)
+		for i=idx,#sequence_.items do
+			local success, result = _run_predicates(sequence_.items[i])
 			if success then
 				return i+1, result
 			end
@@ -32,7 +31,7 @@ end
 
 function seq:collect()
 	local collection = {}
-	for i,item in iterable(self) do
+	for _,item in iterable(self) do
 		table.insert(collection, item)
 	end
 	return collection
@@ -64,8 +63,8 @@ end
 
 function seq:reduce(reducer)
 	local function _reduce(a,b) return a and reducer(a,b) or b end
-	result = nil
-	for k,v in pairs(self:collect()) do
+	local result = nil
+	for _,v in pairs(self:collect()) do
 		result = _reduce(result, v)
 	end
 	return result
