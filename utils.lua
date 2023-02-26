@@ -15,6 +15,13 @@ function utils.read_file(filename, line_parser)
 	return data
 end
 
+function utils.get_temporary_path()
+	local f = io.popen("mktemp -d")
+	if f then
+		return f:lines("*l")()
+	end
+end
+
 function utils.split(input, sep, is_regex)
 	local splits, last_idx, plain = {}, 1, true
 	local function add_substring(from, to)
