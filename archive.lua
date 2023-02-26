@@ -1,13 +1,13 @@
-local utils = require 'utils'
+local utils = require 'utils.utils'
 
 local archive = {}
 local archive_mt = { __index = archive }
 local ZIP = setmetatable({}, archive_mt)
 local RAR = setmetatable({}, archive_mt)
-local mapper = { ZIP = ZIP, RAR = RAR }
+local mapper = { CBZ = ZIP, ZIP = ZIP, RAR = RAR }
 
 function archive:new(file_path)
-	assert(utils.path_exists(file_path), string.format("INVALID PATH '%q'!", file_path)
+	assert(utils.path_exists(file_path), string.format("INVALID PATH '%q'!", file_path))
 	self.ext = utils.get_extension(file_path) or ""
 	self.path = file_path
 	return setmetatable({}, { __index = mapper[self.ext:upper()] or self })
