@@ -15,6 +15,16 @@ function utils.read_file(filename, line_parser)
 	return data
 end
 
+function utils.open_file(filename, mode, callback)
+    local f = io.open(filename, mode)
+    if not f then
+        return
+    end
+    local res = callback(f)
+    f:close()
+    return res
+end
+
 function utils.get_temporary_path()
 	local f = io.popen("mktemp -d")
 	if f then
