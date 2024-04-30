@@ -1,7 +1,7 @@
 local utils = {}
 
 function utils.get_extension(filename)
-	return filename:match("%.([%a]+)$")
+	return filename:match("%.([%d%a]+)$")
 end
 
 function utils.read_file(filename, line_parser)
