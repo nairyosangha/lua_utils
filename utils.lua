@@ -120,4 +120,16 @@ function utils.is_numeric(str)
     return string.match(str, "^-?[%d%.]+$")
 end
 
+function utils.table_slice(t, from, to)
+    local new = {}
+    for i,v in ipairs(t) do
+        if i > to then
+            return new
+        elseif i >= from then
+            table.insert(new, v)
+        end
+    end
+    return new
+end
+
 return utils
