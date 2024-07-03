@@ -82,7 +82,7 @@ end
 
 function utils.run_cmd(cmd)
     local output = {}
-    local f = io.popen(cmd, 'r')
+    local f = assert(io.popen(cmd, 'r'))
     for line in f:lines("*l") do
         table.insert(output, line)
     end
@@ -92,7 +92,7 @@ end
 
 function utils.iterate_cmd(cmd)
     local output = {}
-    local f = io.popen(cmd, 'r')
+    local f = assert(io.popen(cmd, 'r'))
     for line in f:lines("*l") do
         table.insert(output, line)
     end
