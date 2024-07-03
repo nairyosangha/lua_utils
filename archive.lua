@@ -95,22 +95,17 @@ function ZIP:replace_left_brackets(filter)
 end
 
 function ZIP:extract(args)
-    local cmd_str = 'unzip -jo %q %s -d %q'
-    local cmd = cmd_str:format(self.path, self:build_filter(self:replace_left_brackets(args.filter)), args.target_path or ".")
-    print(cmd)
+    local cmd = ('unzip -jo %q %s -d %q'):format(self.path, self:build_filter(self:replace_left_brackets(args.filter)), args.target_path or ".")
     return utils.iterate_cmd(cmd)
 end
 
 function RAR:extract(args)
-    local cmd_str = 'unrar e -o+ %q %s %q'
-    local cmd = cmd_str:format(self.path, self:build_filter(args.filter), args.target_path or ".")
+    local cmd = ('unrar e -o+ %q %s %q'):format(self.path, self:build_filter(args.filter), args.target_path or ".")
     return utils.iterate_cmd(cmd)
 end
 
 function _7Z:extract(args)
-    local cmd_str = [[7z e %q %s -o%q]]
-    local cmd = cmd_str:format(self.path, self:build_filter(args.filter), args.target_path or ".")
-    print(cmd)
+    local cmd = ('7z e %q %s -o%q'):format(self.path, self:build_filter(args.filter), args.target_path or ".")
     return utils.iterate_cmd(cmd)
 end
 
