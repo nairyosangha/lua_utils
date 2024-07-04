@@ -132,4 +132,11 @@ function utils.table_slice(t, from, to)
     return new
 end
 
+function utils.copy_table(t)
+    local copy = {}
+    for _,v in ipairs(t) do table.insert(copy, type(v) == "table" and utils.copy_table(v) or v) end
+    for k,v in pairs(t) do copy[k] = type(v) == "table" and utils.copy_table(v) or v end
+    return copy
+end
+
 return utils
