@@ -44,19 +44,19 @@ function _7Z:build_filter(filters)
 end
 
 function ZIP:list_files(args)
-    local cmd_str = 'unzip -Z -1 %q %s'
+    local cmd_str = 'unzip -Z -1 %q %s 2>/dev/null'
     local cmd = cmd_str:format(self.path, self:build_filter(args.filter))
     return utils.iterate_cmd(cmd)
 end
 
 function RAR:list_files(args)
-    local cmd_str = 'unrar lb %q %s'
+    local cmd_str = 'unrar lb %q %s 2>/dev/null'
     local cmd = cmd_str:format(self.path, self:build_filter(args.filter))
     return utils.iterate_cmd(cmd)
 end
 
 function _7Z:list_files(args)
-    local cmd_str = [[7z l -slt %q %s]]
+    local cmd_str = [[7z l -slt %q %s 2>/dev/null]]
     local cmd = cmd_str:format(self.path, self:build_filter(args.filter))
     local files = {}
     for _,c in ipairs(utils.run_cmd(cmd)) do
@@ -72,15 +72,15 @@ function _7Z:list_files(args)
 end
 
 function ZIP:check_valid()
-    return execute(("unzip -t %q 1>/dev/null"):format(self.path)) == 0
+    return execute(("unzip -t %q >/dev/null 2>&1"):format(self.path)) == 0
 end
 
 function RAR:check_valid()
-    return execute(("unrar t %q"):format(self.path)) == 0
+    return execute(("unrar t %q >/dev/null 2>&1"):format(self.path)) == 0
 end
 
 function _7Z:check_valid()
-    return execute(("7z t %q 1>/dev/null"):format(self.path)) == 0
+    return execute(("7z t %q >/dev/null 2>&1"):format(self.path)) == 0
 end
 
 -- [] are expanded as pattern in unzip command, to 'escape' them '[' is replaced with '[[]'
@@ -95,17 +95,17 @@ function ZIP:replace_left_brackets(filter)
 end
 
 function ZIP:extract(args)
-    local cmd = ('unzip -jo %q %s -d %q'):format(self.path, self:build_filter(self:replace_left_brackets(args.filter)), args.target_path or ".")
+    local cmd = ('unzip -jo %q %s -d %q 2>/dev/null'):format(self.path, self:build_filter(self:replace_left_brackets(args.filter)), args.target_path or ".")
     return utils.iterate_cmd(cmd)
 end
 
 function RAR:extract(args)
-    local cmd = ('unrar e -o+ %q %s %q'):format(self.path, self:build_filter(args.filter), args.target_path or ".")
+    local cmd = ('unrar e -o+ %q %s %q 2>/dev/null'):format(self.path, self:build_filter(args.filter), args.target_path or ".")
     return utils.iterate_cmd(cmd)
 end
 
 function _7Z:extract(args)
-    local cmd = ('7z e %q %s -o%q'):format(self.path, self:build_filter(args.filter), args.target_path or ".")
+    local cmd = ('7z e %q %s -o%q 2>/dev/null'):format(self.path, self:build_filter(args.filter), args.target_path or ".")
     return utils.iterate_cmd(cmd)
 end
 
