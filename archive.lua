@@ -45,13 +45,13 @@ end
 
 function ZIP:list_files(args)
     local cmd_str = 'unzip -Z -1 %q %s 2>/dev/null'
-    local cmd = cmd_str:format(self.path, self:build_filter(args.filter))
+    local cmd = cmd_str:format(self.path, args.filter and self:build_filter(args.filter) or '')
     return utils.iterate_cmd(cmd)
 end
 
 function RAR:list_files(args)
     local cmd_str = 'unrar lb %q %s 2>/dev/null'
-    local cmd = cmd_str:format(self.path, self:build_filter(args.filter))
+    local cmd = cmd_str:format(self.path, args.filter and self:build_filter(args.filter) or '')
     return utils.iterate_cmd(cmd)
 end
 
@@ -63,6 +63,11 @@ function _7Z:list_files(args)
         local _,_, path = c:find("^Path = (.+)$")
         if path then
             table.insert(files, path)
+        else
+            local _,_, size = c:find("^Size = (%d+)")
+            if size and size == '0' then -- this is a directory
+                table.remove(files, #files)
+            end
         end
     end
     return function()
@@ -100,12 +105,12 @@ function ZIP:extract(args)
 end
 
 function RAR:extract(args)
-    local cmd = ('unrar e -o+ %q %s %q 2>/dev/null'):format(self.path, self:build_filter(args.filter), args.target_path or ".")
+    local cmd = ('unrar e -y -o+ %q %s %q 2>/dev/null'):format(self.path, args.filter and self:build_filter(args.filter) or '', args.target_path or ".")
     return utils.iterate_cmd(cmd)
 end
 
 function _7Z:extract(args)
-    local cmd = ('7z e %q %s -o%q 2>/dev/null'):format(self.path, self:build_filter(args.filter), args.target_path or ".")
+    local cmd = ('7z e -y %q %s -o%q 2>/dev/null'):format(self.path, self:build_filter(args.filter), args.target_path or ".")
     return utils.iterate_cmd(cmd)
 end
 
